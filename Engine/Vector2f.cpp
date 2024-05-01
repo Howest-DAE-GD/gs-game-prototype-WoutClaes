@@ -228,9 +228,10 @@ Point2f operator-(Point2f lhs, const Vector2f& rhs)
 	return lhs;
 }
 
-
+/*
 Vector2f operator-(const Point2f& lhs, const Point2f& rhs)
 {
 	Vector2f v{ lhs.x - rhs.x, lhs.y - rhs.y };
 	return v;
 }
+*/

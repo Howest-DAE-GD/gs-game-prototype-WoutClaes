@@ -24,6 +24,12 @@ Point2f::Point2f( float x, float y )
 {
 }
 
+Point2f Point2f::operator-(const Point2f& rhs)
+{
+	Point2f v{ this->x - rhs.x, this->y - rhs.y };
+	return v;
+}
+
 //-----------------------------------------------------------------
 // Rectf Constructors
 //-----------------------------------------------------------------

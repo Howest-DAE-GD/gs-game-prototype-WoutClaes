@@ -19,6 +19,7 @@ struct Point2f
 
 	float x;
 	float y;
+	Point2f operator-(const Point2f& rhs);
 };
 
 

@@ -12,9 +12,11 @@ Game::~Game( )
 	Cleanup( );
 }
 
-void Game::Initialize( )
+void Game::Initialize()
 {
-	
+	m_Player = new Player(Point2f{300, 10});
+	for (int idx{}; idx < m_Enemyamount; ++idx )
+	m_EnemyPtrVctr.push_back(new Enemy(Point2f{float(rand() % 500) , float(rand() % 400)}, 10, 50, 1));
 }
 
 void Game::Cleanup( )
@@ -23,44 +25,55 @@ void Game::Cleanup( )
 
 void Game::Update( float elapsedSec )
 {
-	// Check keyboard state
-	//const Uint8 *pStates = SDL_GetKeyboardState( nullptr );
-	//if ( pStates[SDL_SCANCODE_RIGHT] )
-	//{
-	//	std::cout << "Right arrow key is down\n";
-	//}
-	//if ( pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_UP])
-	//{
-	//	std::cout << "Left and up arrow keys are down\n";
-	//}
+	m_Player->Update(elapsedSec);
+	
+	if (m_EnemyPtrVctr.size() > 0)
+	{
+		for (int idx{ }; idx < m_EnemyPtrVctr.size(); ++idx)
+		{
+			m_EnemyPtrVctr[idx]->Update(elapsedSec, m_Player->GetPlayerPos());
+		}
+	}
+	for (int idx{ }; idx < m_EnemyPtrVctr.size(); ++idx)
+		if (m_EnemyPtrVctr[idx]->HitDetection()) m_EnemyPtrVctr[idx]->m_Health - m_BulletDamage;
 }
 
 void Game::Draw( ) const
 {
 	ClearBackground( );
+	m_Player->Draw();
+	if (m_EnemyPtrVctr.size() > 0)
+	{
+		for (int idx{}; idx < m_EnemyPtrVctr.size(); ++idx) m_EnemyPtrVctr[idx]->Draw();
+	}
 }
 
 void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 {
-	//std::cout << "KEYDOWN event: " << e.keysym.sym << std::endl;
 }
 
 void Game::ProcessKeyUpEvent( const SDL_KeyboardEvent& e )
 {
-	//std::cout << "KEYUP event: " << e.keysym.sym << std::endl;
-	//switch ( e.keysym.sym )
-	//{
-	//case SDLK_LEFT:
-	//	//std::cout << "Left arrow key released\n";
-	//	break;
-	//case SDLK_RIGHT:
-	//	//std::cout << "`Right arrow key released\n";
-	//	break;
-	//case SDLK_1:
-	//case SDLK_KP_1:
-	//	//std::cout << "Key 1 released\n";
-	//	break;
-	//}
+	switch (e.keysym.sym)
+	{
+	case SDLK_UP:
+		m_BulletPtrVctr.push_back(new Bullet(m_Player->GetPlayerPos(), false, false, true, false, m_BulletDamage, m_BulletSpeed));
+		break;
+	case SDLK_LEFT:
+		m_BulletPtrVctr.push_back(new Bullet(m_Player->GetPlayerPos(), true, false, false, false, m_BulletDamage, m_BulletSpeed));
+		break;
+	case SDLK_DOWN:
+		m_BulletPtrVctr.push_back(new Bullet(m_Player->GetPlayerPos(), false, false, false, true, m_BulletDamage, m_BulletSpeed));
+		break;
+	case SDLK_RIGHT:
+		m_BulletPtrVctr.push_back(new Bullet(m_Player->GetPlayerPos(), false, true, false, false, m_BulletDamage, m_BulletSpeed));
+		break;
+	}
+	
+	for (int idx{ }; idx < m_EnemyPtrVctr.size(); ++idx)
+	{
+		m_EnemyPtrVctr[idx]->ProcessKeyUpEvent(e);
+	}
 }
 
 void Game::ProcessMouseMotionEvent( const SDL_MouseMotionEvent& e )
@@ -108,3 +121,4 @@ void Game::ClearBackground( ) const
 	glClearColor( 0.0f, 0.0f, 0.3f, 1.0f );
 	glClear( GL_COLOR_BUFFER_BIT );
 }
+
