@@ -32,10 +32,31 @@ private:
 	void ClearBackground( ) const;
 
 	// DATA MEMBERS
-	Player* m_Player;
 	std::vector<Enemy*> m_EnemyPtrVctr;
-	std::vector<Bullet*> m_BulletPtrVctr;
-	float m_BulletDamage{ 1.f };
-	float m_BulletSpeed{ 150.f };
-	int m_Enemyamount{ 1 };
+	bool messagePrinted;
 };
+
+
+// feedback current week
+/*
+1:
+
+1.
+2.
+3.
+
+
+2: 
+
+1. 
+2. 
+3. 
+
+
+3:
+
+1.
+2.
+3.
+
+*/

@@ -2,16 +2,17 @@
 #include "Enemy.h"
 #include <iostream>
 
-int enemySize{ 10 };
+int enemySize{ 30 };
 
-Enemy::Enemy(Point2f spawn, float health, float speed, float damage)
-	:m_Position{spawn}
-	,m_Health{health}
+Enemy::Enemy(float health, float speed, float damage)
+	:m_Health{health}
 	,m_Speed{speed}
 	,m_Damage{damage}
 	,m_Alive{true}
+	,m_BulletDelay{ 0 }
 {
 	m_Player = new Player(Point2f{ 300, 10 });
+	m_Position = Point2f{ float(rand() % 500),float(rand() % 300) };
 }
 
 void Enemy::Draw() const
@@ -22,23 +23,20 @@ void Enemy::Draw() const
 		utils::FillEllipse(m_Position.x, m_Position.y, enemySize, enemySize);
 	}
 
-	if (m_BulletPtrVctr.size() > 0)
+	if (m_Player->m_BulletPtrVctr.size() > 0)
 	{
-		for (int idx{}; idx < m_BulletPtrVctr.size(); ++idx) m_BulletPtrVctr[idx]->Draw();
+		for (int idx{}; idx < m_Player->m_BulletPtrVctr.size(); ++idx) m_Player->m_BulletPtrVctr[idx]->Draw();
 	}
+	m_Player->Draw();
 }
 
-void Enemy::Update(float elapsedsec, Point2f playerPos)
+void Enemy::Update(float elapsedsec)
 {
-	m_Player->Update(elapsedsec);
-	for (int idx{ }; idx < m_BulletPtrVctr.size(); ++idx)
-	{
-		m_BulletPtrVctr[idx]->Update(elapsedsec);
-	}
+	m_Player->Update(elapsedsec, HitDetectionBullet());
 
 	if (m_Alive)
 	{
-		Point2f temp = playerPos - m_Position;
+		Point2f temp = m_Player->GetPlayerPos() - m_Position;
 		float angle = atan2(temp.y, temp.x);
 		double multCos{ cos(angle) };
 		double multSin{ sin(angle) };
@@ -46,16 +44,34 @@ void Enemy::Update(float elapsedsec, Point2f playerPos)
 		m_Position.x += (m_Speed * multCos) * elapsedsec;
 		m_Position.y += (m_Speed * multSin) * elapsedsec;
 
-		if (HitDetection()) m_Health -= 10;
+
+		if (HitDetectionPlayer())
+		{
+			m_Player->m_Health -= 1 * elapsedsec;
+		}
+		if (HitDetectionBullet())
+		{
+			m_Health -= 1;
+		}
 
 		if (m_Health <= 0) m_Alive = false;
 	}
 
-	for (int idx{ }; idx < m_BulletPtrVctr.size(); ++idx)
+	// update the bullets
+	if (m_Player->m_BulletPtrVctr.size() > 0)
 	{
-		m_BulletPtrVctr[idx]->Update(elapsedsec);
+		for (int idx{ }; idx < m_Player->m_BulletPtrVctr.size(); ++idx)
+		{
+			m_Player->m_BulletPtrVctr[idx]->Update(elapsedsec);
+		}
 	}
 
+	if (m_BulletDelay >= 1)
+	{
+		m_BulletDelay += 1 * elapsedsec;
+
+		if (m_BulletDelay > 1.5) m_BulletDelay = 0;
+	}
 }
 
 Point2f Enemy::GetEnemyPos()
@@ -68,32 +84,58 @@ Circlef Enemy::GetEnemyCircle()
 	return Circlef(m_Position, enemySize);
 }
 
-bool Enemy::HitDetection()
+bool Enemy::HitDetectionBullet()
 {
 	bool isHit{};
-	for (int idx{ }; idx < m_BulletPtrVctr.size(); ++idx)
+	for (int idx{ }; idx < m_Player->m_BulletPtrVctr.size(); ++idx)
 	{
-		isHit = utils::IsPointInCircle(m_BulletPtrVctr[idx]->GetBulletPos(), GetEnemyCircle());
-		delete m_BulletPtrVctr[idx];
+		isHit = utils::IsPointInCircle(m_Player->m_BulletPtrVctr[idx]->GetBulletPos(), GetEnemyCircle());
 	}
 	return isHit;
 }
 
-void Enemy::ProcessKeyUpEvent(const SDL_KeyboardEvent& e)
+bool Enemy::HitDetectionPlayer()
+{
+	bool isHit{};
+	isHit = utils::IsOverlapping(m_Player->GetPlayerCircle(), GetEnemyCircle());
+	return isHit;
+}
+
+void Enemy::ProcessKeyDownEvent(const SDL_KeyboardEvent& e)
 {
 	switch (e.keysym.sym)
 	{
-	case SDLK_UP:
-		m_BulletPtrVctr.push_back(new Bullet(m_Player->GetPlayerPos(), false, false, true, false, m_BulletDamage, m_BulletSpeed));
-		break;
 	case SDLK_LEFT:
-		m_BulletPtrVctr.push_back(new Bullet(m_Player->GetPlayerPos(), true, false, false, false, m_BulletDamage, m_BulletSpeed));
-		break;
-	case SDLK_DOWN:
-		m_BulletPtrVctr.push_back(new Bullet(m_Player->GetPlayerPos(), false, false, false, true, m_BulletDamage, m_BulletSpeed));
+		// Bullet
+		if (m_BulletDelay == 0)
+		{
+			m_Player->m_BulletPtrVctr.push_back(new Bullet(m_Player->GetPlayerPos(), true, false, false, false));
+			m_BulletDelay = 1;
+		}
 		break;
 	case SDLK_RIGHT:
-		m_BulletPtrVctr.push_back(new Bullet(m_Player->GetPlayerPos(), false, true, false, false, m_BulletDamage, m_BulletSpeed));
+		//Bullet
+		if (m_BulletDelay == 0)
+		{
+			m_Player->m_BulletPtrVctr.push_back(new Bullet(m_Player->GetPlayerPos(), false, true, false, false));
+			m_BulletDelay = 1;
+		}
+		break;
+	case SDLK_UP:
+		//Bullet
+		if (m_BulletDelay == 0)
+		{
+			m_Player->m_BulletPtrVctr.push_back(new Bullet(m_Player->GetPlayerPos(), false, false, true, false));
+			m_BulletDelay = 1;
+		}
+		break;
+	case SDLK_DOWN:
+		//Bullet
+		if (m_BulletDelay == 0)
+		{
+			m_Player->m_BulletPtrVctr.push_back(new Bullet(m_Player->GetPlayerPos(), false, false, false, true));
+			m_BulletDelay = 1;
+		}
 		break;
 	}
 }

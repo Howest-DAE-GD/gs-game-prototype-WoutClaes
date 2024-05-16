@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Game.h"
+#include <iostream>
 
 Game::Game( const Window& window ) 
 	:BaseGame{ window }
@@ -14,9 +15,8 @@ Game::~Game( )
 
 void Game::Initialize()
 {
-	m_Player = new Player(Point2f{300, 10});
-	for (int idx{}; idx < m_Enemyamount; ++idx )
-	m_EnemyPtrVctr.push_back(new Enemy(Point2f{float(rand() % 500) , float(rand() % 400)}, 10, 50, 1));
+	for (int idx{}; idx <= 10; ++idx)
+	m_EnemyPtrVctr.push_back(new Enemy(5, 80, 2));
 }
 
 void Game::Cleanup( )
@@ -25,55 +25,52 @@ void Game::Cleanup( )
 
 void Game::Update( float elapsedSec )
 {
-	m_Player->Update(elapsedSec);
-	
-	if (m_EnemyPtrVctr.size() > 0)
+	for (int idx{}; idx < m_EnemyPtrVctr.size(); ++idx)
 	{
-		for (int idx{ }; idx < m_EnemyPtrVctr.size(); ++idx)
-		{
-			m_EnemyPtrVctr[idx]->Update(elapsedSec, m_Player->GetPlayerPos());
-		}
+		m_EnemyPtrVctr[idx]->Update(elapsedSec);
 	}
-	for (int idx{ }; idx < m_EnemyPtrVctr.size(); ++idx)
-		if (m_EnemyPtrVctr[idx]->HitDetection()) m_EnemyPtrVctr[idx]->m_Health - m_BulletDamage;
+
+	
+	for (int idx{}; idx < m_EnemyPtrVctr.size(); ++idx)
+	{
+		if (!m_EnemyPtrVctr[idx]->m_Alive)
+		{
+			if (!messagePrinted)
+			{
+				std::cout << "pick an upgrade (not in game yet)" << std::endl;
+				messagePrinted = true;
+			}
+		}
+		else
+		{
+			idx = m_EnemyPtrVctr.size();
+		}
+		// if (alive)
+		// { break }
+		// if (idx == size()-1) printmessage
+	}
 }
 
 void Game::Draw( ) const
 {
-	ClearBackground( );
-	m_Player->Draw();
-	if (m_EnemyPtrVctr.size() > 0)
+	ClearBackground();
+	for (int idx{}; idx < m_EnemyPtrVctr.size(); ++idx)
 	{
-		for (int idx{}; idx < m_EnemyPtrVctr.size(); ++idx) m_EnemyPtrVctr[idx]->Draw();
+		m_EnemyPtrVctr[idx]->Draw();
 	}
 }
 
 void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 {
+	for (int idx{}; idx < m_EnemyPtrVctr.size(); ++idx)
+	{
+		m_EnemyPtrVctr[idx]->ProcessKeyDownEvent(e);
+	}
 }
 
 void Game::ProcessKeyUpEvent( const SDL_KeyboardEvent& e )
-{
-	switch (e.keysym.sym)
-	{
-	case SDLK_UP:
-		m_BulletPtrVctr.push_back(new Bullet(m_Player->GetPlayerPos(), false, false, true, false, m_BulletDamage, m_BulletSpeed));
-		break;
-	case SDLK_LEFT:
-		m_BulletPtrVctr.push_back(new Bullet(m_Player->GetPlayerPos(), true, false, false, false, m_BulletDamage, m_BulletSpeed));
-		break;
-	case SDLK_DOWN:
-		m_BulletPtrVctr.push_back(new Bullet(m_Player->GetPlayerPos(), false, false, false, true, m_BulletDamage, m_BulletSpeed));
-		break;
-	case SDLK_RIGHT:
-		m_BulletPtrVctr.push_back(new Bullet(m_Player->GetPlayerPos(), false, true, false, false, m_BulletDamage, m_BulletSpeed));
-		break;
-	}
+{	
 	
-	for (int idx{ }; idx < m_EnemyPtrVctr.size(); ++idx)
-	{
-		m_EnemyPtrVctr[idx]->ProcessKeyUpEvent(e);
-	}
 }
 
 void Game::ProcessMouseMotionEvent( const SDL_MouseMotionEvent& e )

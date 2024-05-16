@@ -1,23 +1,32 @@
 #pragma once
+#include "Texture.h"
+#include <iostream>
 #include "utils.h"
 class Bullet
 {
 public:
-	Bullet(Point2f startpos, bool left, bool right, bool up, bool down, float damage, float speed);
+	Bullet(Point2f startpos, bool left, bool right, bool up, bool down);
+	~Bullet();
+
 	void Draw() const;
 	void Update(float elapsedSec);
 	Point2f GetBulletPos();
 
 private:
-	enum class Direction
+	// functions
+
+	// enum classes
+	enum class BulletDirection
 	{
-		up, left, down, right
+		Up,
+		Down,
+		Left,
+		Right
 	};
 
-	Direction m_BulletDirection;
-	float m_BulletSpeed;
-	float m_Damage;
-	Point2f m_Position;
-	float m_Speed;
+	// datamembers
+	const int m_BulletSpeed;
+	BulletDirection m_BulletDirection;
+	Point2f m_BulletPosition;
 };
 
