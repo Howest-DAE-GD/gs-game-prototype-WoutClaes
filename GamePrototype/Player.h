@@ -8,7 +8,6 @@ class Player
 public:
 	
 	Player(Point2f startPos);
-	~Player();
 	void Draw() const;
 	void Update(float elapsedSec, bool hit);
 	void ProcessKeyDownEvent(const SDL_KeyboardEvent& e);

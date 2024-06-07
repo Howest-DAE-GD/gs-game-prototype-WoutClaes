@@ -21,6 +21,7 @@ void Game::Initialize()
 
 void Game::Cleanup( )
 {
+	m_EnemyPtrVctr.clear();
 }
 
 void Game::Update( float elapsedSec )
@@ -33,21 +34,18 @@ void Game::Update( float elapsedSec )
 	
 	for (int idx{}; idx < m_EnemyPtrVctr.size(); ++idx)
 	{
-		if (!m_EnemyPtrVctr[idx]->m_Alive)
+		if (m_EnemyPtrVctr[idx]->m_Alive)
+		{
+			break;
+		}
+		else if (idx == m_EnemyPtrVctr.size() - 1)
 		{
 			if (!messagePrinted)
 			{
-				std::cout << "pick an upgrade (not in game yet)" << std::endl;
+				std::cout << "pick a upgrade (not in game yet) (**pls press space to simulate game loop)" << std::endl;
 				messagePrinted = true;
 			}
 		}
-		else
-		{
-			idx = m_EnemyPtrVctr.size();
-		}
-		// if (alive)
-		// { break }
-		// if (idx == size()-1) printmessage
 	}
 }
 
@@ -70,7 +68,13 @@ void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 
 void Game::ProcessKeyUpEvent( const SDL_KeyboardEvent& e )
 {	
-	
+	switch (e.keysym.sym)
+	{
+	case SDLK_SPACE:
+		Cleanup();
+		Initialize();
+		break;
+	}
 }
 
 void Game::ProcessMouseMotionEvent( const SDL_MouseMotionEvent& e )

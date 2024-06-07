@@ -33,7 +33,7 @@ private:
 
 	// DATA MEMBERS
 	std::vector<Enemy*> m_EnemyPtrVctr;
-	bool messagePrinted;
+	bool messagePrinted{ false };
 };
 
 

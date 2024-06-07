@@ -103,39 +103,5 @@ bool Enemy::HitDetectionPlayer()
 
 void Enemy::ProcessKeyDownEvent(const SDL_KeyboardEvent& e)
 {
-	switch (e.keysym.sym)
-	{
-	case SDLK_LEFT:
-		// Bullet
-		if (m_BulletDelay == 0)
-		{
-			m_Player->m_BulletPtrVctr.push_back(new Bullet(m_Player->GetPlayerPos(), true, false, false, false));
-			m_BulletDelay = 1;
-		}
-		break;
-	case SDLK_RIGHT:
-		//Bullet
-		if (m_BulletDelay == 0)
-		{
-			m_Player->m_BulletPtrVctr.push_back(new Bullet(m_Player->GetPlayerPos(), false, true, false, false));
-			m_BulletDelay = 1;
-		}
-		break;
-	case SDLK_UP:
-		//Bullet
-		if (m_BulletDelay == 0)
-		{
-			m_Player->m_BulletPtrVctr.push_back(new Bullet(m_Player->GetPlayerPos(), false, false, true, false));
-			m_BulletDelay = 1;
-		}
-		break;
-	case SDLK_DOWN:
-		//Bullet
-		if (m_BulletDelay == 0)
-		{
-			m_Player->m_BulletPtrVctr.push_back(new Bullet(m_Player->GetPlayerPos(), false, false, false, true));
-			m_BulletDelay = 1;
-		}
-		break;
-	}
+	m_Player->ProcessKeyDownEvent(e);
 }
